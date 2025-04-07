@@ -1,0 +1,20 @@
+# PASTURE Framework Dependencies
+
+# HTTP Client for API Calls
+aiohttp>=3.8.0
+
+# Data Validation
+pydantic>=2.0.0
+
+# Retry Logic
+tenacity>=8.0.0
+
+# Testing
+pytest>=7.0.0
+pytest-asyncio>=0.18.0
+pytest-cov>=4.0.0
+
+# Development
+black>=23.0.0
+isort>=5.12.0
+mypy>=1.0.0

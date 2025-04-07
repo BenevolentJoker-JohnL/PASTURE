@@ -1,0 +1,21 @@
+{
+    "cache_dir": "./cache",
+    "simulation_mode": false,
+    "log_level": "INFO",
+    "request_timeout": 90.0,
+    "max_retries": 2,
+    "retry_delay": 2.0,
+    "preload_models": true,
+    "sequential_execution": true,
+    "fallback_threshold": 2,
+    "min_response_length": 10,
+    "verbose_output": false,
+    "debug_mode": false,
+    "api_base": "http://localhost:11434",
+    "json_patching": {
+        "enabled": true,
+        "max_attempts": 3,
+        "fallback_to_text": true,
+        "patching_prompt": "The previous output was not valid JSON. Please fix it and return only valid JSON that matches the expected schema: {schema}"
+    }
+}

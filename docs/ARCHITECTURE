@@ -1,0 +1,220 @@
+# PASTURE Framework Architecture
+
+This document explains the architecture of the PASTURE Framework, including its core and optional components.
+
+## Core Architecture
+
+PASTURE is built on three fundamental dependencies:
+
+1. **Pydantic**: For robust data validation and configuration management
+2. **Asyncio**: For efficient asynchronous processing and non-blocking I/O
+3. **Tenacity**: For resilient retry logic with configurable backoff strategies
+
+### Core Components
+
+![Core Architecture](https://via.placeholder.com/800x400.png?text=PASTURE+Core+Architecture)
+
+The core architecture includes:
+
+#### Configuration Management (`Config`)
+- Built with Pydantic for schema validation
+- Supports loading from JSON files
+- Includes field validation and type checking
+
+#### Model Management (`ModelManager`)
+- Communicates with Ollama API
+- Handles model loading/unloading
+- Manages resource utilization
+- Implements retry logic with Tenacity
+
+#### JSON Processing (`JSONProcessor`)
+- Validates and repairs JSON responses
+- Extracts structured data from text
+- Ensures consistent output format
+
+#### Caching System (`FileCache`)
+- Provides persistent cache storage
+- Implements TTL (time-to-live) expiration
+- Reduces redundant API calls
+
+#### Pipeline Orchestration (`Pipeline`, `AnalysisStep`, `ModelStep`)
+- Manages execution flow and dependencies
+- Handles error recovery and fallbacks
+- Supports sequential processing of steps
+
+## Distributed Architecture (Optional)
+
+When the optional Celery and Redis dependencies are installed, PASTURE extends with distributed processing capabilities:
+
+![Distributed Architecture](https://via.placeholder.com/800x500.png?text=PASTURE+Distributed+Architecture)
+
+### Distributed Components
+
+#### Celery Integration (`CeleryModelStep`, `DistributedPipeline`)
+- Offloads model processing to worker processes
+- Scales horizontally across machines
+- Provides task queuing and prioritization
+
+#### Redis Backend
+- Serves as message broker for Celery
+- Stores task results
+- Enables persistence and recovery
+
+## Dependency Flow
+
+### Core Dependencies
+
+```
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│   Pydantic  │     │   Asyncio   │     │  Tenacity   │
+└──────┬──────┘     └──────┬──────┘     └──────┬──────┘
+       │                   │                   │
+       ▼                   ▼                   ▼
+┌─────────────┐     ┌─────────────┐     ┌─────────────┐
+│    Config   │     │ ModelManager│     │ Retry Logic │
+└─────────────┘     └─────────────┘     └─────────────┘
+       │                   │                   │
+       └───────────────────┼───────────────────┘
+                           │
+                           ▼
+                    ┌─────────────┐
+                    │   PASTURE   │
+                    │    Core     │
+                    └─────────────┘
+```
+
+### Optional Dependencies
+
+```
+┌─────────────┐     ┌─────────────┐
+│    Celery   │     │    Redis    │
+└──────┬──────┘     └──────┬──────┘
+       │                   │
+       └───────────┬───────┘
+                   │
+                   ▼
+          ┌─────────────────┐
+          │    PASTURE      │
+          │   Distributed   │
+          └────────┬────────┘
+                   │
+                   ▼
+          ┌─────────────────┐
+          │    PASTURE      │
+          │      Core       │
+          └─────────────────┘
+```
+
+## Processing Flow
+
+### Standard Processing Flow
+
+1. **Configuration**: Load and validate settings
+2. **Initialization**: Set up cache and model manager
+3. **Pipeline Creation**: Define steps and dependencies
+4. **Execution**: Process steps sequentially
+5. **Result Collection**: Aggregate outputs from all steps
+
+```
+┌───────────┐    ┌───────────┐    ┌───────────┐    ┌───────────┐
+│  Step 1   │ -> │  Step 2   │ -> │  Step 3   │ -> │  Step 4   │
+└───────────┘    └───────────┘    └───────────┘    └───────────┘
+```
+
+### Distributed Processing Flow
+
+1. **Configuration**: Load and validate settings
+2. **Task Submission**: Submit steps as Celery tasks
+3. **Distributed Execution**: Process tasks across workers
+4. **Result Collection**: Wait for and collect all results
+5. **Integration**: Combine results into a cohesive output
+
+```
+                 ┌───────────┐
+                 │ Queue 1   │
+┌───────────┐    │ ┌───────┐ │    ┌───────────┐
+│           │ -> │ │Step 1 │ │ -> │ Worker 1  │
+│           │    │ └───────┘ │    └───────────┘
+│           │    └───────────┘
+│ PASTURE   │    ┌───────────┐      
+│ Client    │    │ Queue 2   │    ┌───────────┐
+│           │ -> │ ┌───────┐ │ -> │ Worker 2  │
+│           │    │ │Step 2 │ │    └───────────┘
+│           │    │ └───────┘ │
+└───────────┘    └───────────┘
+       ▲
+       │
+┌──────┴──────┐
+│  Results    │
+└─────────────┘
+```
+
+## Data Flow
+
+### Model Processing
+
+```
+┌───────────┐    ┌───────────┐    ┌───────────┐    ┌───────────┐
+│ Format    │ -> │ Generate  │ -> │ Process   │ -> │ Cache     │
+│ Prompt    │    │ Response  │    │ Response  │    │ Result    │
+└───────────┘    └───────────┘    └───────────┘    └───────────┘
+```
+
+### Pipeline Orchestration
+
+```
+┌───────────┐    ┌───────────┐    ┌───────────┐    ┌───────────┐
+│ Input     │ -> │ Execute   │ -> │ Collect   │ -> │ Return    │
+│ Data      │    │ Steps     │    │ Results   │    │ Output    │
+└───────────┘    └───────────┘    └───────────┘    └───────────┘
+```
+
+## Implementation Details
+
+### Core Dependencies Usage
+
+#### Pydantic
+- `Config` class with field validation
+- Nested validation of configuration options
+- JSON schema generation and enforcement
+- Type coercion and custom validators
+
+#### Asyncio
+- Asynchronous HTTP requests to Ollama API
+- Concurrent model operations when possible
+- Non-blocking I/O operations
+- Event loop and task management
+
+#### Tenacity
+- Retry logic with exponential backoff
+- Circuit breaker patterns for unreliable models
+- Configurable retry conditions and limits
+- Error handling and recovery
+
+### Optional Dependencies Usage
+
+#### Celery
+- Task definition for model operations
+- Worker management and scaling
+- Result storage and retrieval
+- Task routing and prioritization
+
+#### Redis
+- Message broker for task queues
+- Backend for result storage
+- Distributed locks for resource management
+- Caching layer (optional enhancement)
+
+## Extension Points
+
+PASTURE is designed with extensibility in mind:
+
+1. **Custom Steps**: Create new `AnalysisStep` subclasses
+2. **Custom Pipelines**: Implement specialized pipeline logic
+3. **Alternative Caching**: Replace `FileCache` with other backends
+4. **Processing Middleware**: Add pre/post-processing hooks
+5. **Model Extensions**: Add support for other model APIs
+
+## Conclusion
+
+PASTURE's architecture provides a flexible framework for AI model orchestration, with a solid core that can function independently and optional extensions for distributed processing. This design ensures that users can start with a simple setup and gradually scale up as their needs evolve.

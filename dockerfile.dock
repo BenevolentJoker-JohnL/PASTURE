@@ -1,0 +1,19 @@
+FROM python:3.9-slim
+
+WORKDIR /app
+
+# Install dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy PASTURE code
+COPY . .
+
+# Install the package with optional Celery dependencies
+RUN pip install -e ".[celery]"
+
+# Create cache directory
+RUN mkdir -p /app/cache
+
+# Default command - runs the simple example
+CMD ["python", "examples/simple_pipeline.py"]

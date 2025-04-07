@@ -1,0 +1,26 @@
+pasture/
+├── pasture.py              # The provided script (core implementation)
+├── __init__.py             # Marks 'pasture' as a Python package
+├── config/
+│   ├── default_config.json # Default configuration settings (e.g., cache_dir, timeouts)
+│   └── custom_config.json  # Optional user-defined config overrides
+├── cache/                  # Cache directory for FileCache (created at runtime)
+│   ├── [hash].json         # Example cached response file (e.g., md5-hashed keys)
+│   └── [hash].json         # Another cached response file
+├── tests/
+│   ├── __init__.py         # Marks 'tests' as a package
+│   ├── test_config.py      # Unit tests for Config class
+│   ├── test_filecache.py   # Unit tests for FileCache class
+│   ├── test_jsonprocessor.py # Unit tests for JSONProcessor class
+│   ├── test_modelmanager.py # Unit tests for ModelManager class
+│   └── test_pipeline.py    # Unit tests for Pipeline and ModelStep classes
+├── docs/
+│   ├── README.md           # Project overview and usage instructions
+│   ├── INSTALL.md          # Installation guide (e.g., setting up Ollama)
+│   └── API.md              # API documentation for PASTURE classes/methods
+├── examples/
+│   ├── simple_pipeline.py  # Example script using PASTURE for a basic pipeline
+│   └── multi_model.py      # Example with multiple models and fallbacks
+├── requirements.txt        # Dependencies (e.g., aiohttp, pydantic, tenacity)
+├── setup.py                # Setup script for packaging PASTURE as a module
+└── LICENSE                 # License file (e.g., MIT, GPL)
